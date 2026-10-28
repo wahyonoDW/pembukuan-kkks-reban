@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<base target="_top">
+<title>Pembukuan KKKS — Kecamatan Reban</title>
+<style>
+:root{
+  --navy:#0f2a4a;--navy2:#1a3d6e;--blue:#2563eb;--sky:#e8f0fe;
+  --bg:#f4f7fb;--card:#fff;--text:#1e293b;--muted:#64748b;
+  --line:#e2e8f0;--ok:#059669;--okbg:#d1fae5;--warn:#d97706;--warnbg:#fef3c7;
+  --bad:#dc2626;--badbg:#fee2e2;--radius:14px;
+  --shadow:0 4px 20px rgba(15,42,74,.08);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+button,input,select,textarea{font:inherit}
+.hidden{display:none!important}
+#viewLogin{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;
+  background:linear-gradient(145deg,#0f2a4a 0%,#1a3d6e 50%,#2563eb 100%)}
+.login-card{background:#fff;border-radius:20px;padding:36px 32px;width:100%;max-width:420px;box-shadow:0 20px 60px rgba(0,0,0,.25);text-align:center}
+.login-logo{width:110px;height:110px;object-fit:contain;margin:0 auto 12px;display:block;filter:drop-shadow(0 4px 12px rgba(0,0,0,.15))}
+.login-card h1{font-size:1.25rem;color:var(--navy);margin:8px 0 2px}
+.login-card .sub{color:var(--muted);font-size:.85rem;margin-bottom:22px;line-height:1.4}
+.role-btns{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:8px}
+.role-btns button{padding:16px 12px;border:2px solid var(--line);border-radius:12px;background:#fff;cursor:pointer;transition:.15s;font-weight:600;color:var(--navy)}
+.role-btns button:hover{border-color:var(--blue);background:var(--sky)}
+.role-btns button.active{border-color:var(--blue);background:var(--sky);box-shadow:0 0 0 3px rgba(37,99,235,.15)}
+.form-block{text-align:left;margin-top:18px}
+.form-block label{display:block;font-size:.8rem;font-weight:600;color:var(--muted);margin-bottom:6px}
+.form-block input,.form-block select,.form-block textarea{
+  width:100%;padding:11px 14px;border:1.5px solid var(--line);border-radius:10px;margin-bottom:12px;background:#fafbfc}
+.form-block input:focus,.form-block select:focus,.form-block textarea:focus{outline:none;border-color:var(--blue);background:#fff}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:10px 18px;border-radius:10px;
+  border:1.5px solid var(--line);background:#fff;cursor:pointer;font-weight:600;color:var(--text);transition:.15s}
+.btn:hover{background:#f8fafc}
+.btn.primary{background:var(--blue);color:#fff;border-color:var(--blue)}
+.btn.primary:hover{background:#1d4ed8}
+.btn.block{width:100%}
+.btn:disabled{opacity:.55;cursor:not-allowed}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--navy);color:#fff;
+  padding:12px 22px;border-radius:10px;font-size:.9rem;opacity:0;transition:.3s;z-index:9999;max-width:90vw;text-align:center}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+#viewApp{display:flex;min-height:100vh}
+.sidebar{width:260px;background:var(--navy);color:#fff;display:flex;flex-direction:column;flex-shrink:0}
+.brand{display:flex;align-items:center;gap:12px;padding:20px 18px;border-bottom:1px solid rgba(255,255,255,.1)}
+.brand img{width:48px;height:48px;border-radius:10px;background:#fff;object-fit:contain;padding:3px}
+.brand strong{display:block;font-size:.95rem}
+.brand small{opacity:.7;font-size:.75rem}
+.nav{padding:12px;flex:1}
+.nav button{width:100%;text-align:left;padding:11px 14px;border:0;border-radius:10px;background:transparent;
+  color:rgba(255,255,255,.8);cursor:pointer;font-weight:500;margin-bottom:4px}
+.nav button:hover,.nav button.active{background:rgba(255,255,255,.12);color:#fff}
+.sidebar-foot{padding:16px;border-top:1px solid rgba(255,255,255,.1)}
+.sidebar-foot .note{font-size:.72rem;opacity:.55;margin-bottom:12px;line-height:1.4}
+.main{flex:1;display:flex;flex-direction:column;min-width:0}
+.topbar{background:#fff;border-bottom:1px solid var(--line);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.topbar h1{font-size:1.15rem;color:var(--navy)}
+.topbar .eyebrow{font-size:.7rem;font-weight:700;letter-spacing:.06em;color:var(--muted);text-transform:uppercase}
+.content{padding:22px 24px 40px;flex:1}
+.marquee-wrap{background:linear-gradient(90deg,#fef3c7,#fee2e2);border:1px solid #fcd34d;border-radius:10px;
+  padding:10px 0;margin-bottom:18px;overflow:hidden;white-space:nowrap}
+.marquee-wrap span{display:inline-block;padding-left:100%;animation:marquee 22s linear infinite;font-weight:600;color:#92400e;font-size:.9rem}
+@keyframes marquee{0%{transform:translateX(0)}100%{transform:translateX(-100%)}}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin-bottom:20px}
+.card{background:var(--card);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow);border:1px solid var(--line)}
+.card .label{font-size:.75rem;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+.card .value{font-size:1.35rem;font-weight:700;color:var(--navy);margin-top:6px}
+.card.danger .value{color:var(--bad)}
+.card.ok .value{color:var(--ok)}
+.panel{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);border:1px solid var(--line);overflow:hidden;margin-bottom:18px}
+.panel-h{padding:14px 18px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.panel-h h2{font-size:.95rem;color:var(--navy)}
+.panel-b{padding:16px 18px}
+table{width:100%;border-collapse:collapse;font-size:.88rem}
+th,td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--line)}
+th{background:#f8fafc;font-weight:600;color:var(--muted);font-size:.75rem;text-transform:uppercase;letter-spacing:.03em}
+tr.unpaid{background:var(--badbg)}
+tr.partial{background:var(--warnbg)}
+tr.paid{background:#f0fdf4}
+.pill{display:inline-block;padding:3px 10px;border-radius:999px;font-size:.72rem;font-weight:700}
+.pill.Lunas{background:var(--okbg);color:var(--ok)}
+.pill.Sebagian{background:var(--warnbg);color:var(--warn)}
+.pill.Belum{background:var(--badbg);color:var(--bad)}
+.empty{text-align:center;padding:40px 20px;color:var(--muted)}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.money{font-variant-numeric:tabular-nums;white-space:nowrap}
+.money-inp{width:118px;padding:6px 8px;border:1.5px solid var(--line);border-radius:8px;background:#fff}
+@media(max-width:800px){
+  #viewApp{flex-direction:column}
+  .sidebar{width:100%}
+  .nav{display:flex;flex-wrap:wrap;padding:8px;gap:4px}
+  .nav button{width:auto}
+  .sidebar-foot{display:none}
+  .content{padding:14px}
+}
+@media print{
+  body *{visibility:hidden}
+  #printArea,#printArea *{visibility:visible}
+  #printArea{position:absolute;left:0;top:0;width:100%;padding:24px}
+  .no-print{display:none!important}
+}
+#printArea{display:none}
+#printArea.show{display:block}
+.print-sheet{max-width:480px;margin:0 auto;font-family:system-ui,sans-serif;color:#111}
+.print-kop{text-align:center;border-bottom:2px solid #0f2a4a;padding-bottom:12px;margin-bottom:14px}
+.print-kop img{width:72px;height:72px;object-fit:contain}
+.print-kop h2{font-size:14px;margin:6px 0 2px;color:#0f2a4a}
+.print-kop p{font-size:11px;color:#444;margin:1px 0}
+.print-meta{font-size:12px;margin-bottom:12px}
+.print-sheet table{width:100%;border-collapse:collapse;font-size:11px;margin-bottom:12px}
+.print-sheet th,.print-sheet td{border:1px solid #ccc;padding:5px 7px}
+.print-sheet th{background:#f1f5f9}
+.print-tot{font-size:12px;margin:10px 0 20px}
+.print-sign{display:flex;justify-content:space-between;margin-top:28px;font-size:11px;text-align:center}
+.print-sign div{width:42%}
+.print-sign .space{height:48px}
+.print-foot{text-align:center;font-size:10px;color:#666;margin-top:18px;border-top:1px dashed #ccc;padding-top:8px}
+</style>
+</head>
+<body>
+<div id="viewLogin">
+  <div class="login-card">
+    <img class="login-logo" id="loginLogo" alt="Logo KKKS">
+    <h1>KKKS Ki Hajar Dewantara</h1>
+    <p class="sub">Kecamatan Reban · Pembukuan Keuangan Sekolah<br>Tagihan Kewajiban SD 2026</p>
+    <div class="role-btns">
+      <button type="button" id="btnRoleAdmin" onclick="pickRole('admin')">Login Admin</button>
+      <button type="button" id="btnRoleVisitor" onclick="pickRole('visitor')">Login Sekolah</button>
+    </div>
+    <div id="formAdmin" class="form-block hidden">
+      <label>Password Admin</label>
+      <input type="password" id="adminPass" placeholder="Password bendahara" autocomplete="current-password">
+      <button type="button" class="btn primary block" id="btnLoginAdmin" onclick="doLoginAdmin()">Masuk sebagai Admin</button>
+    </div>
+    <div id="formVisitor" class="form-block hidden">
+      <label>Pilih Sekolah</label>
+      <select id="sekolahSelect"><option value="">— Memuat daftar sekolah —</option></select>
+      <label>Password Sekolah</label>
+      <input type="password" id="visitorPass" placeholder="Default: nomor urut sekolah" autocomplete="current-password">
+      <button type="button" class="btn primary block" id="btnLoginVisitor" onclick="doLoginVisitor()">Masuk sebagai Sekolah</button>
+    </div>
+  </div>
+</div>
+<div id="viewApp" class="hidden">
+  <aside class="sidebar">
+    <div class="brand">
+      <img id="brandLogo" alt="Logo">
+      <div><strong id="brandTitle">KKKS Reban</strong><small id="brandSub">Portal Keuangan</small></div>
+    </div>
+    <nav class="nav" id="nav"></nav>
+    <div class="sidebar-foot">
+      <div class="note">Data dari sheet KewajibanSD2026. Sekolah hanya melihat data sendiri.</div>
+      <button type="button" class="btn block" style="color:#0f2a4a;background:#fff" onclick="doLogout()">Keluar</button>
+    </div>
+  </aside>
+  <div class="main">
+    <header class="topbar">
+      <div>
+        <div class="eyebrow" id="topEyebrow">PEMBUKUAN KKKS</div>
+        <h1 id="pageTitle">Dashboard</h1>
+      </div>
+      <span id="whoBadge" class="pill Lunas">—</span>
+    </header>
+    <section class="content" id="content"></section>
+  </div>
+</div>
+<div id="printArea"></div>
+<div class="toast" id="toast"></div>
+<script>
+
+var LOGO_SRC = "data:image/jpeg;base64,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";
+var state = { role: null, token: null, nama: null, no: null };
+
+function $(id){ return document.getElementById(id); }
+function toast(msg){
+  var t = $('toast'); t.textContent = msg; t.classList.add('show');
+  setTimeout(function(){ t.classList.remove('show'); }, 3500);
+}
+function rupiah(n){ n = Number(n)||0; return 'Rp ' + n.toLocaleString('id-ID'); }
+function esc(s){
+  return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function safeName(n){ return String(n||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'"); }
+
+function pickRole(role){
+  $('btnRoleAdmin').classList.toggle('active', role==='admin');
+  $('btnRoleVisitor').classList.toggle('active', role==='visitor');
+  $('formAdmin').classList.toggle('hidden', role!=='admin');
+  $('formVisitor').classList.toggle('hidden', role!=='visitor');
+  if(role==='visitor') loadSekolahList();
+}
+function loadSekolahList(){
+  google.script.run.withSuccessHandler(function(res){
+    var sel=$('sekolahSelect');
+    sel.innerHTML='<option value="">— Pilih sekolah —</option>';
+    if(!res||!res.ok){ toast((res&&res.message)||'Gagal memuat sekolah'); return; }
+    (res.sekolah||[]).forEach(function(s){
+      var o=document.createElement('option'); o.value=s.nama; o.textContent=s.no+'. '+s.nama; sel.appendChild(o);
+    });
+  }).withFailureHandler(function(e){ toast(e.message||e); }).listSekolahPublic();
+}
+function doLoginAdmin(){
+  var pass=$('adminPass').value; if(!pass){ toast('Isi password admin'); return; }
+  $('btnLoginAdmin').disabled=true;
+  google.script.run.withSuccessHandler(function(res){
+    $('btnLoginAdmin').disabled=false;
+    if(!res||!res.ok){ toast((res&&res.message)||'Login gagal'); return; }
+    state.role='admin'; state.token=res.token; state.nama=res.nama; enterApp();
+  }).withFailureHandler(function(e){ $('btnLoginAdmin').disabled=false; toast(e.message||e); }).loginAdmin(pass);
+}
+function doLoginVisitor(){
+  var nama=$('sekolahSelect').value, pass=$('visitorPass').value;
+  if(!nama){ toast('Pilih sekolah'); return; } if(!pass){ toast('Isi password'); return; }
+  $('btnLoginVisitor').disabled=true;
+  google.script.run.withSuccessHandler(function(res){
+    $('btnLoginVisitor').disabled=false;
+    if(!res||!res.ok){ toast((res&&res.message)||'Login gagal'); return; }
+    state.role='visitor'; state.token=res.token; state.nama=res.nama; state.no=res.no; enterApp();
+  }).withFailureHandler(function(e){ $('btnLoginVisitor').disabled=false; toast(e.message||e); }).loginVisitor(nama, pass);
+}
+function doLogout(){
+  state={role:null,token:null,nama:null,no:null};
+  $('viewApp').classList.add('hidden'); $('viewLogin').classList.remove('hidden');
+  $('adminPass').value=''; $('visitorPass').value='';
+  $('btnRoleAdmin').classList.remove('active'); $('btnRoleVisitor').classList.remove('active');
+  $('formAdmin').classList.add('hidden'); $('formVisitor').classList.add('hidden');
+}
+function enterApp(){
+  $('viewLogin').classList.add('hidden'); $('viewApp').classList.remove('hidden');
+  $('brandTitle').textContent='KKKS Reban';
+  $('brandSub').textContent=state.role==='admin'?'Administrator':state.nama;
+  $('whoBadge').textContent=state.role==='admin'?'● Admin':'● '+state.nama;
+  buildNav();
+  if(state.role==='admin') showAdminDashboard(); else showVisitorDashboard();
+}
+function buildNav(){
+  var nav=$('nav');
+  if(state.role==='admin'){
+    nav.innerHTML='<button type="button" class="active" data-p="dash" onclick="showAdminDashboard()">Dashboard</button>'+
+      '<button type="button" data-p="pengumuman" onclick="showPengumuman()">Pengumuman</button>'+
+      '<button type="button" data-p="akses" onclick="showAkses()">Password Sekolah</button>';
+  } else {
+    nav.innerHTML='<button type="button" class="active" data-p="tagihan" onclick="showVisitorDashboard()">Tagihan Saya</button>';
+  }
+}
+function setNavActive(p){
+  document.querySelectorAll('#nav button').forEach(function(b){ b.classList.toggle('active', b.getAttribute('data-p')===p); });
+}
+
+function showAdminDashboard(){
+  setNavActive('dash'); $('pageTitle').textContent='Dashboard Admin'; $('topEyebrow').textContent='Semua Sekolah';
+  $('content').innerHTML='<div class="empty">Memuat data KewajibanSD2026…</div>';
+  google.script.run.withSuccessHandler(function(res){
+    if(!res||!res.ok){ $('content').innerHTML='<div class="empty">'+esc(res&&res.message||'Gagal')+'</div>'; return; }
+    var s=res.summary;
+    var rows=(res.sekolah||[]).map(function(x){
+      var cls=x.totalKurang>0?'unpaid':'paid';
+      return '<tr class="'+cls+'"><td>'+esc(x.no)+'</td><td><b>'+esc(x.nama)+'</b></td>'+
+        '<td class="money">'+rupiah(x.totalTagihan)+'</td><td class="money">'+rupiah(x.totalBayar)+'</td>'+
+        '<td class="money"><b>'+rupiah(x.totalKurang)+'</b></td><td>'+(x.belumLunas||0)+' item</td>'+
+        '<td class="no-print"><button type="button" class="btn" onclick="adminDetail(\''+safeName(x.nama)+'\')">Detail</button> '+
+        '<button type="button" class="btn" onclick="cetakSekolah(\''+safeName(x.nama)+'\')">Cetak</button></td></tr>';
+    }).join('');
+    $('content').innerHTML=
+      '<div class="cards">'+
+        '<div class="card"><div class="label">Jumlah Sekolah</div><div class="value">'+s.sekolah+'</div></div>'+
+        '<div class="card"><div class="label">Total Tagihan</div><div class="value">'+rupiah(s.totalTagihan)+'</div></div>'+
+        '<div class="card ok"><div class="label">Total Terbayar</div><div class="value">'+rupiah(s.totalBayar)+'</div></div>'+
+        '<div class="card danger"><div class="label">Total Kekurangan</div><div class="value">'+rupiah(s.totalKurang)+'</div></div>'+
+      '</div><div class="panel"><div class="panel-h"><h2>Rekap per Sekolah</h2></div>'+
+      '<div class="panel-b" style="overflow:auto"><table><thead><tr><th>No</th><th>Sekolah</th><th>Tagihan</th><th>Terbayar</th><th>Kekurangan</th><th>Item belum</th><th class="no-print">Aksi</th></tr></thead><tbody>'+
+      (rows||'<tr><td colspan="7">Belum ada data</td></tr>')+'</tbody></table></div></div>';
+  }).withFailureHandler(function(e){ $('content').innerHTML='<div class="empty">'+esc(e.message||e)+'</div>'; })
+  .getAdminDashboard(state.token);
+}
+
+function adminDetail(nama){
+  $('pageTitle').textContent=nama; $('content').innerHTML='<div class="empty">Memuat detail…</div>';
+  google.script.run.withSuccessHandler(function(res){
+    if(!res||!res.ok){ toast(res&&res.message||'Gagal'); return; }
+    renderSekolahDetail(res.sekolah, true);
+  }).withFailureHandler(function(e){ toast(e.message||e); }).getAdminSekolahDetail(state.token, nama);
+}
+
+function showPengumuman(){
+  setNavActive('pengumuman'); $('pageTitle').textContent='Pengumuman Tagihan';
+  $('topEyebrow').textContent='Tampil berjalan di dashboard sekolah';
+  $('content').innerHTML='<div class="panel"><div class="panel-h"><h2>Tulis Pengumuman</h2></div><div class="panel-b">'+
+    '<p style="color:var(--muted);font-size:.88rem;margin-bottom:12px">Muncul sebagai <b>tulisan berjalan</b> di dashboard setiap sekolah.</p>'+
+    '<div class="form-block" style="margin:0"><label>Isi pengumuman</label>'+
+    '<textarea id="pengumumanTeks" rows="4" placeholder="Contoh: Segera lunasi tagihan TW.4 dan HUT RI sebelum tanggal 30."></textarea>'+
+    '<button type="button" class="btn primary" onclick="savePengumuman()">Simpan & Tampilkan</button></div></div></div>';
+  google.script.run.withSuccessHandler(function(res){
+    if(res&&res.pengumuman) $('pengumumanTeks').value=res.pengumuman;
+  }).getAdminDashboard(state.token);
+}
+function savePengumuman(){
+  google.script.run.withSuccessHandler(function(res){ toast(res.message||'Tersimpan'); })
+    .withFailureHandler(function(e){ toast(e.message||e); })
+    .savePengumuman(state.token, $('pengumumanTeks').value);
+}
+
+function showAkses(){
+  setNavActive('akses'); $('pageTitle').textContent='Password Sekolah'; $('topEyebrow').textContent='Sheet Akses';
+  $('content').innerHTML='<div class="empty">Memuat…</div>';
+  google.script.run.withSuccessHandler(function(res){
+    var rows=(res.rows||[]).map(function(r){
+      return '<tr><td>'+esc(r.no)+'</td><td>'+esc(r.nama)+'</td><td><code>'+esc(r.password)+'</code></td><td>'+esc(r.aktif)+'</td>'+
+        '<td><button type="button" class="btn" onclick="ubahPass(\''+safeName(r.nama)+'\')">Ubah</button></td></tr>';
+    }).join('');
+    $('content').innerHTML='<div class="panel"><div class="panel-h"><h2>Daftar Akses Login Sekolah</h2></div>'+
+      '<div class="panel-b" style="overflow:auto"><p style="font-size:.85rem;color:var(--muted);margin-bottom:12px">Password default = nomor urut di KewajibanSD2026. Bisa diubah di sini atau sheet <b>Akses</b>.</p>'+
+      '<table><thead><tr><th>No</th><th>Sekolah</th><th>Password</th><th>Aktif</th><th></th></tr></thead><tbody>'+rows+'</tbody></table></div></div>';
+  }).withFailureHandler(function(e){ $('content').innerHTML='<div class="empty">'+esc(e.message||e)+'</div>'; }).getAksesList(state.token);
+}
+function ubahPass(nama){
+  var p=prompt('Password baru untuk '+nama+':',''); if(p==null||!String(p).trim()) return;
+  google.script.run.withSuccessHandler(function(res){ toast(res.message||'OK'); showAkses(); })
+    .withFailureHandler(function(e){ toast(e.message||e); }).updatePasswordSekolah(state.token, nama, String(p).trim());
+}
+
+function showVisitorDashboard(){
+  setNavActive('tagihan'); $('pageTitle').textContent='Tagihan Kegiatan'; $('topEyebrow').textContent='Portal Sekolah';
+  $('content').innerHTML='<div class="empty">Memuat data sekolah Anda…</div>';
+  google.script.run.withSuccessHandler(function(res){
+    if(!res||!res.ok){ $('content').innerHTML='<div class="empty">'+esc(res&&res.message||'Gagal')+'</div>'; return; }
+    var html='';
+    if(res.pengumuman){
+      html+='<div class="marquee-wrap"><span>📢 '+esc(res.pengumuman)+' &nbsp;•&nbsp; 📢 '+esc(res.pengumuman)+'</span></div>';
+    }
+    if(res.diagnosa){
+      html+='<p class="no-print" style="color:#64748b;font-size:.8rem;margin:8px 2px">'+esc(res.diagnosa)+'</p>';
+    }
+    $('content').innerHTML=html;
+    renderSekolahDetail(res.sekolah, false);
+  }).withFailureHandler(function(e){ $('content').innerHTML='<div class="empty">'+esc(e.message||e)+'</div>'; })
+  .getVisitorDashboard(state.token);
+}
+
+function renderSekolahDetail(s, isAdmin){
+  var items=s.items||[];
+  var rows=items.map(function(it,idx){
+    var cls=it.status==='Lunas'?'paid':(it.status==='Sebagian'?'partial':(it.status==='Kosong'?'':'unpaid'));
+    var tagihanCell = isAdmin
+      ? '<input class="money-inp" data-field="tagihan" data-nama="'+esc(it.nama)+'" type="number" min="0" step="1" value="'+(Number(it.tagihan)||0)+'">'
+      : rupiah(it.tagihan);
+    var bayarCell = isAdmin
+      ? '<input class="money-inp" data-field="bayar" data-nama="'+esc(it.nama)+'" type="number" min="0" step="1" value="'+(Number(it.bayar)||0)+'">'
+      : rupiah(it.bayar);
+    return '<tr class="'+cls+'"><td>'+(idx+1)+'</td><td>'+esc(it.nama)+'</td>'+
+      '<td class="money">'+tagihanCell+'</td><td class="money">'+bayarCell+'</td>'+
+      '<td class="money"><b>'+rupiah(it.kurang)+'</b></td>'+
+      '<td><span class="pill '+(it.status==='Kosong'?'Belum':esc(it.status))+'">'+esc(it.status)+'</span></td></tr>';
+  }).join('');
+  var saveBtn = isAdmin
+    ? '<button type="button" class="btn primary no-print" onclick="simpanNominal(\''+safeName(s.nama)+'\')">Simpan ke Spreadsheet</button> '
+    : '';
+  var block='<div class="cards">'+
+      '<div class="card"><div class="label">Total Tagihan</div><div class="value">'+rupiah(s.totalTagihan)+'</div></div>'+
+      '<div class="card ok"><div class="label">Sudah Dibayar</div><div class="value">'+rupiah(s.totalBayar)+'</div></div>'+
+      '<div class="card danger"><div class="label">Kekurangan</div><div class="value">'+rupiah(s.totalKurang)+'</div></div></div>'+
+    '<div class="panel"><div class="panel-h"><h2>'+esc(s.nama)+' — Rincian Tagihan</h2><div>'+saveBtn+
+      '<button type="button" class="btn primary no-print" onclick="cetakSekolah(\''+safeName(s.nama)+'\')">Cetak Struk</button></div></div>'+
+    '<div class="panel-b" style="overflow:auto"><table><thead><tr><th>No</th><th>Kegiatan</th><th>Tagihan</th><th>Bayar</th><th>Kekurangan</th><th>Status</th></tr></thead><tbody>'+
+    (rows||'<tr><td colspan="6">Tidak ada item</td></tr>')+'</tbody></table></div></div>';
+  if(isAdmin){
+    $('content').innerHTML='<div class="toolbar no-print"><button type="button" class="btn" onclick="showAdminDashboard()">← Kembali</button>'+
+      '<span style="color:var(--muted);font-size:.85rem">Ubah angka lalu Simpan. Nilai ditulis ke sheet KewajibanSD2026.</span></div>'+block;
+  } else {
+    $('content').innerHTML=($('content').innerHTML||'')+block;
+  }
+}
+
+function simpanNominal(nama){
+  var map={};
+  document.querySelectorAll('#content input[data-nama]').forEach(function(inp){
+    var n=inp.getAttribute('data-nama');
+    if(!map[n]) map[n]={nama:n, tagihan:0, bayar:0};
+    map[n][inp.getAttribute('data-field')]=Number(inp.value)||0;
+  });
+  var items=Object.keys(map).map(function(k){ return map[k]; });
+  toast('Menyimpan...');
+  google.script.run.withSuccessHandler(function(res){
+    toast(res.message||'Tersimpan');
+    adminDetail(nama);
+  }).withFailureHandler(function(e){ toast(e.message||e); })
+  .saveSchoolNominals(state.token, nama, items);
+}
+
+function cetakSekolah(nama){
+  google.script.run.withSuccessHandler(function(res){
+    if(!res||!res.ok){ toast(res&&res.message||'Gagal cetak'); return; }
+    var s=res.sekolah;
+    var rows=(s.items||[]).map(function(it,i){
+      return '<tr><td>'+(i+1)+'</td><td>'+esc(it.nama)+'</td><td style="text-align:right">'+rupiah(it.tagihan)+
+        '</td><td style="text-align:right">'+rupiah(it.bayar)+'</td><td style="text-align:right">'+rupiah(it.kurang)+'</td></tr>';
+    }).join('');
+    var html='<div class="print-sheet"><div class="print-kop">'+
+      '<img src="'+LOGO_SRC+'" alt="Logo"><h2>KKKS KI HAJAR DEWANTARA</h2>'+
+      '<p>Kecamatan Reban · Kabupaten Batang</p><p>Bukti Rekap Tagihan Kewajiban SD Tahun 2026</p></div>'+
+      '<div class="print-meta"><div><b>Sekolah:</b> '+esc(s.nama)+'</div><div><b>Tanggal cetak:</b> '+esc(res.tanggal)+'</div></div>'+
+      '<table><thead><tr><th>No</th><th>Kegiatan</th><th>Tagihan</th><th>Bayar</th><th>Kurang</th></tr></thead><tbody>'+rows+'</tbody></table>'+
+      '<div class="print-tot"><div><b>Total Tagihan:</b> '+rupiah(s.totalTagihan)+'</div>'+
+      '<div><b>Total Terbayar:</b> '+rupiah(s.totalBayar)+'</div><div><b>Kekurangan:</b> '+rupiah(s.totalKurang)+'</div></div>'+
+      '<div class="print-sign"><div>Mengetahui,<br><b>Ketua KKKS</b><br>Ki Hajar Dewantara Reban<div class="space"></div><u>'+esc(res.ketua||'........................')+'</u></div>'+
+      '<div><b>Bendahara KKKS</b><br>Ki Hajar Dewantara Reban<div class="space"></div><u>'+esc(res.bendahara||'........................')+'</u></div></div>'+
+      '<div class="print-foot">Dicetak dari aplikasi Pembukuan Keuangan KKKS Kecamatan Reban · '+esc(res.tanggal)+'</div></div>';
+    var pa=$('printArea'); pa.innerHTML=html; pa.classList.add('show');
+    setTimeout(function(){ window.print(); setTimeout(function(){ pa.classList.remove('show'); pa.innerHTML=''; }, 400); }, 200);
+  }).withFailureHandler(function(e){ toast(e.message||e); }).getPrintData(state.token, nama||'');
+}
+
+// init logos
+$('loginLogo').src = LOGO_SRC;
+$('brandLogo').src = LOGO_SRC;
+</script>
+</body>
+</html>
